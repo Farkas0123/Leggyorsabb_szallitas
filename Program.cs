@@ -339,22 +339,40 @@ namespace Leggyorsabb_szállítás
 
                     foreach (int szomszed in szomszÉdai) //vesszük a szomszédokat
                     {
+                        Console.WriteLine($"csucsok: {todo}    {szomszed}");
+                        Console.WriteLine($"uj tav: {tav[todo] + Szomszedsagi_tomb[todo, szomszed]}   regi tav:{tav[szomszed]}");
                         if (!voltamitt[szomszed] && tav[todo] + Szomszedsagi_tomb[todo, szomszed] < tav[szomszed])
                         {
+                            Console.WriteLine($"---------Rövidebb a téma");
+                            Console.WriteLine($"honnan: {honnan[szomszed]}   milyen hosszú{tav[todo] + Szomszedsagi_tomb[todo, szomszed]} ");
                             honnan[szomszed] = todo;
                             tav[szomszed] = tav[todo] + Szomszedsagi_tomb[todo, szomszed];
 
                             kupac.Push(szomszed);
+
+                            
                             // megváltozott a súlya a szomszédnak, viszont a kupacban a helye nem változott. Ezért betesszük újra, így viszont sokszor lesz bent...
                             // kupac.Update(szomszed); // kellene egy ilyen!
                         }
+                        
                         else if (!voltamitt[szomszed] && tav[todo] + Szomszedsagi_tomb[todo, szomszed] == tav[szomszed])
                         {
+                            Console.WriteLine("////////// Egyenlő a téma");
+                            Console.WriteLine($" Max suly {suly}     uj suly{Szomszedsagi_suly[todo, szomszed]}");
+
+
                             if (suly < Szomszedsagi_suly[todo, szomszed])
                             {
                                 suly = Szomszedsagi_suly[todo, szomszed];
+
+                                //valami változtatást kéne még ide érni, át kell irni az elérést de még nem tudom, hogy hogyan lehetne
+
                             }
+
+
+
                         }
+                        Console.WriteLine();
                     }
                 }
                 return (tav, honnan);
@@ -371,13 +389,14 @@ namespace Leggyorsabb_szállítás
             (int[] result, int[] oda) = graf.Dijkstra(start);
 
             (List<int> ut, int vegeredmeny) = graf.Honnan_tomb_felgongyolitese(oda, cel);
-            /*Console.WriteLine($"{start}=>{cel}: {result[cel]} ");
+
+            Console.WriteLine($"{start}=>{cel}: {result[cel]} ");
 
             Console.WriteLine(string.Join(", ", ut));
-            Console.WriteLine(vegeredmeny);*/
+            Console.WriteLine(vegeredmeny);
 
-            Console.WriteLine($"{result[cel]} {vegeredmeny}");
-            Console.WriteLine(string.Join(" ", ut));
+            /*Console.WriteLine($"{result[cel]} {vegeredmeny}");
+            Console.WriteLine(string.Join(" ", ut));*/
 
 
 
