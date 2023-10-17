@@ -301,7 +301,7 @@ namespace Leggyorsabb_szállítás
             public (int[], int[]) Dijkstra(int start)
             {
                 //inicializáltuk a tav-ot
-                int[] tav = new int[N + 1];
+                (int,int)[] tav = new int[N + 1]; // ide kell számpárokat létrehozni, hogy jogosan meg tudjam változtatni a relációt amikor inicializálom a kupacot
                 for (int i = 1; i < N + 1; i++)
                     tav[i] = int.MaxValue; // végtelen megfelelője
 
@@ -345,12 +345,12 @@ namespace Leggyorsabb_szállítás
                         {
                             Console.WriteLine($"---------Rövidebb a téma");
                             Console.WriteLine($"honnan: {honnan[szomszed]}   milyen hosszú{tav[todo] + Szomszedsagi_tomb[todo, szomszed]} ");
+                            
                             honnan[szomszed] = todo;
                             tav[szomszed] = tav[todo] + Szomszedsagi_tomb[todo, szomszed];
-
                             kupac.Push(szomszed);
 
-                            
+                            Console.WriteLine(  );
                             // megváltozott a súlya a szomszédnak, viszont a kupacban a helye nem változott. Ezért betesszük újra, így viszont sokszor lesz bent...
                             // kupac.Update(szomszed); // kellene egy ilyen!
                         }
@@ -358,15 +358,24 @@ namespace Leggyorsabb_szállítás
                         else if (!voltamitt[szomszed] && tav[todo] + Szomszedsagi_tomb[todo, szomszed] == tav[szomszed])
                         {
                             Console.WriteLine("////////// Egyenlő a téma");
-                            Console.WriteLine($" Max suly {suly}     uj suly{Szomszedsagi_suly[todo, szomszed]}");
-
+                            //Console.WriteLine($" Max suly {suly}     uj suly{Szomszedsagi_suly[todo, szomszed]}");
+                            Console.WriteLine($"{suly} < {Szomszedsagi_suly[todo, szomszed]}");
 
                             if (suly < Szomszedsagi_suly[todo, szomszed])
                             {
+                                Console.WriteLine($" Max suly {suly}     uj suly{Szomszedsagi_suly[todo, szomszed]}");
+                                Console.WriteLine("valzoztatas elott"+suly);
+
                                 suly = Szomszedsagi_suly[todo, szomszed];
 
-                                //valami változtatást kéne még ide érni, át kell irni az elérést de még nem tudom, hogy hogyan lehetne
+                                Console.WriteLine("valzoztatas utan" + suly);
 
+
+                                //valami változtatást kéne még ide érni, át kell irni az elérést de még nem tudom, hogy hogyan lehetne
+                                
+                                honnan[szomszed] = todo;
+                                tav[szomszed] = tav[todo] + Szomszedsagi_tomb[todo, szomszed];
+                                kupac.Push(szomszed);
                             }
 
 
