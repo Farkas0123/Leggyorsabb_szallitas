@@ -252,67 +252,25 @@ namespace Leggyorsabb_szállítás
 
 
 
-            /*public List<int> Legrovidebb_ut(int innen, int ide)
-            {
-                int fehér = 0;
-                int szürke = 1;
-                int fekete = 2;
+           
 
-                int[] szín = new int[szomszedsagi_lista.Count];
-
-                Queue<int> tennivalok = new Queue<int>();
-                tennivalok.Enqueue(innen);
-                szín[innen] = szürke;
-
-
-                List<int> result = new List<int>();
-
-                int[] honnan = new int[szomszedsagi_lista.Count+1];
-
-
-                for (int i = 0; i < szomszedsagi_lista.Count; i++)
-                {
-                    honnan[i] = -1;
-                }
-
-                while (tennivalok.Count != 0)
-                {
-                    int feldolgozando = tennivalok.Dequeue();
-                    if (feldolgozando[0] == ide)
-                    {
-                        return Honnan_tomb_felgongyolitese(honnan, ide);
-                    }
-                    szín[feldolgozando] = fekete;
-
-                    foreach (int szomszed in szomszedsagi_lista[feldolgozando])
-                    {
-                        if (szín[szomszed] == fehér)
-                        {
-                            tennivalok.Enqueue(szomszed);
-                            honnan[szomszed] = feldolgozando;
-                            szín[szomszed] = szürke;
-                        }
-                    }
-                }
-                return null;
-            }*/
-
-
-            public (int[], int[]) Dijkstra(int start)
+            public ((int, int)[], int[]) Dijkstra(int start)
             {
                 //inicializáltuk a tav-ot
-                (int,int)[] tav = new int[N + 1]; // ide kell számpárokat létrehozni, hogy jogosan meg tudjam változtatni a relációt amikor inicializálom a kupacot
+                (int,int)[] tav = new (int,int)[N + 1]; // ide kell számpárokat létrehozni, hogy jogosan meg tudjam változtatni a relációt amikor inicializálom a kupacot
                 for (int i = 1; i < N + 1; i++)
-                    tav[i] = int.MaxValue; // végtelen megfelelője
+                    tav[i] = (int.MaxValue,int.MaxValue); // végtelen megfelelője
 
-                tav[start] = 0;
+                tav[start] = (0,0);
+
+                //nem haladtunk rosszul, viszont még valamit kell csinálni a relációval, súlyokat is össze kéne hasonlítani amiket szerintem egyesével kell beírni
 
                 // honnan inicializálás
                 int[] honnan = new int[N + 1];
                 for (int i = 1; i < N + 1; i++)
                     honnan[i] = -1;
 
-                Kupac<int> kupac = new Kupac<int>((x, y) => tav[x] > tav[y] ? -1 : (tav[x] == tav[y] ? 0 : 1));
+                Kupac<int> kupac = new Kupac<int>((x, y) => tav[x].Item1 > tav[y].Item1 ? -1 : (tav[x] == tav[y] ? 0 : 1));
 
                 for (int i = 1; i < N + 1; i++)
                 {
@@ -327,7 +285,7 @@ namespace Leggyorsabb_szállítás
                 {
                     int todo = kupac.Pop(); //kiszedünk egy elemet
 
-                    if (tav[todo] == int.MaxValue) // amikor már végtelenek a legkisebbek, akkor abbahagyjuk
+                    if (tav[todo].Item1 == int.MaxValue) // amikor már végtelenek a legkisebbek, akkor abbahagyjuk
                         return (tav, honnan);
 
 
@@ -339,49 +297,49 @@ namespace Leggyorsabb_szállítás
 
                     foreach (int szomszed in szomszÉdai) //vesszük a szomszédokat
                     {
-                        Console.WriteLine($"csucsok: {todo}    {szomszed}");
-                        Console.WriteLine($"uj tav: {tav[todo] + Szomszedsagi_tomb[todo, szomszed]}   regi tav:{tav[szomszed]}");
-                        if (!voltamitt[szomszed] && tav[todo] + Szomszedsagi_tomb[todo, szomszed] < tav[szomszed])
+                        //Console.WriteLine($"csucsok: {todo}    {szomszed}");
+                        //Console.WriteLine($"uj tav: {tav[todo].Item1 + Szomszedsagi_tomb[todo, szomszed]}   regi tav:{tav[szomszed].Item1}");
+                        if (!voltamitt[szomszed] && tav[todo].Item1 + Szomszedsagi_tomb[todo, szomszed] < tav[szomszed].Item1)
                         {
-                            Console.WriteLine($"---------Rövidebb a téma");
-                            Console.WriteLine($"honnan: {honnan[szomszed]}   milyen hosszú{tav[todo] + Szomszedsagi_tomb[todo, szomszed]} ");
+                            //Console.WriteLine($"---------Rövidebb a téma");
+                            //Console.WriteLine($"honnan: {honnan[szomszed]}   milyen hosszú{tav[todo].Item1 + Szomszedsagi_tomb[todo, szomszed]} ");
                             
                             honnan[szomszed] = todo;
-                            tav[szomszed] = tav[todo] + Szomszedsagi_tomb[todo, szomszed];
+                            tav[szomszed].Item1 = tav[todo].Item1 + Szomszedsagi_tomb[todo, szomszed];
                             kupac.Push(szomszed);
 
-                            Console.WriteLine(  );
+                            //Console.WriteLine(  );
                             // megváltozott a súlya a szomszédnak, viszont a kupacban a helye nem változott. Ezért betesszük újra, így viszont sokszor lesz bent...
                             // kupac.Update(szomszed); // kellene egy ilyen!
                         }
                         
-                        else if (!voltamitt[szomszed] && tav[todo] + Szomszedsagi_tomb[todo, szomszed] == tav[szomszed])
+                        else if (!voltamitt[szomszed] && tav[todo].Item1 + Szomszedsagi_tomb[todo, szomszed] == tav[szomszed].Item1)
                         {
-                            Console.WriteLine("////////// Egyenlő a téma");
+                            //Console.WriteLine("////////// Egyenlő a téma");
                             //Console.WriteLine($" Max suly {suly}     uj suly{Szomszedsagi_suly[todo, szomszed]}");
-                            Console.WriteLine($"{suly} < {Szomszedsagi_suly[todo, szomszed]}");
+                            //Console.WriteLine($"{suly} < {Szomszedsagi_suly[todo, szomszed]}");
 
                             if (suly < Szomszedsagi_suly[todo, szomszed])
                             {
-                                Console.WriteLine($" Max suly {suly}     uj suly{Szomszedsagi_suly[todo, szomszed]}");
-                                Console.WriteLine("valzoztatas elott"+suly);
+                                //Console.WriteLine($" Max suly {suly}     uj suly{Szomszedsagi_suly[todo, szomszed]}");
+                                //Console.WriteLine("valzoztatas elott"+suly);
 
                                 suly = Szomszedsagi_suly[todo, szomszed];
 
-                                Console.WriteLine("valzoztatas utan" + suly);
+                                //Console.WriteLine("valzoztatas utan" + suly);
 
 
                                 //valami változtatást kéne még ide érni, át kell irni az elérést de még nem tudom, hogy hogyan lehetne
                                 
                                 honnan[szomszed] = todo;
-                                tav[szomszed] = tav[todo] + Szomszedsagi_tomb[todo, szomszed];
+                                tav[szomszed].Item1 = tav[todo].Item1 + Szomszedsagi_tomb[todo, szomszed];
                                 kupac.Push(szomszed);
                             }
 
 
 
                         }
-                        Console.WriteLine();
+                        //Console.WriteLine();
                     }
                 }
                 return (tav, honnan);
@@ -395,17 +353,17 @@ namespace Leggyorsabb_szállítás
 
             int cel = graf.hova;
             int start = graf.honnan;
-            (int[] result, int[] oda) = graf.Dijkstra(start);
+            ((int, int)[] result, int[] oda) = graf.Dijkstra(start);
 
             (List<int> ut, int vegeredmeny) = graf.Honnan_tomb_felgongyolitese(oda, cel);
 
-            Console.WriteLine($"{start}=>{cel}: {result[cel]} ");
+            //Console.WriteLine($"{start}=>{cel}: {result[cel].Item1} ");
 
-            Console.WriteLine(string.Join(", ", ut));
-            Console.WriteLine(vegeredmeny);
+            //Console.WriteLine(string.Join(", ", ut));
+            //Console.WriteLine(vegeredmeny);
 
-            /*Console.WriteLine($"{result[cel]} {vegeredmeny}");
-            Console.WriteLine(string.Join(" ", ut));*/
+            Console.WriteLine($"{result[cel].Item1} {vegeredmeny}");
+            Console.WriteLine(string.Join(" ", ut));
 
 
 
