@@ -139,32 +139,30 @@ namespace Leggyorsabb_szállítás
 
         class Szomszedsagi_listas_graf
         {
-            //List<List<int[]>> szomszedsagi_lista;
-
+            //Bevezetem a privát és publikus globális változókat
             int[,] Szomszedsagi_tomb;
             int[,] Szomszedsagi_suly;
             int N;
             int M;
             public int honnan;
             public int hova;
+
+            // Létrehozom a gráfot
             public Szomszedsagi_listas_graf()
             {
-                //szomszedsagi_lista = new List<List<int[]>>();
-
-
+                //Beolvasom az elsó sort
                 string sor = Console.ReadLine();
                 string[] sortomb = sor.Split(' ');
+
+                //Az első sor adatait elmentem
                 N = int.Parse(sortomb[0]);
                 M = int.Parse(sortomb[1]);
 
-                Szomszedsagi_tomb = new int[N + 1, N + 1];
+                // Létrehozom a táv- és súlytömböket 
+                Szomszedsagi_tomb = new int[N + 1, N + 1]; // Azért N + 1, mert a MESTER-rel így a legegyszerűbb dolgozni
                 Szomszedsagi_suly = new int[N + 1, N + 1];
 
-                /*for (int i = 0; i < N+1; i++)//feltöltjük a listát, hogy ne fagyjon ki
-                {
-                    szomszedsagi_lista.Add(new List<int[]>());
-                }*/
-
+                // A tömböt feltöltöm '-1' értékekkel ami a 'nincs adat'-ot jelöli
                 for (int i = 0; i < N + 1; i++)
                 {
                     for (int j = 0; j < N + 1; j++)
@@ -173,41 +171,46 @@ namespace Leggyorsabb_szállítás
                     }
                 }
 
+                // Beolvasom az összes többi sort az utolsó kivételével
                 for (int i = 1; i < M + 1; i++)
                 {
                     sor = Console.ReadLine();
                     sortomb = sor.Split(' ');
+                    // Egy sor 4 értékének összesét elmentem
                     (int innen, int ide, int tav, int suly) = (int.Parse(sortomb[0]), int.Parse(sortomb[1]), int.Parse(sortomb[2]), int.Parse(sortomb[3]));
 
-
+                    // A fentebb mentett értékek összesét felhasználva az adatokat elmentem
                     Szomszedsagi_tomb[innen, ide] = tav;
                     Szomszedsagi_tomb[ide, innen] = tav;
                     Szomszedsagi_suly[innen, ide] = suly;
                     Szomszedsagi_suly[ide, innen] = suly;
-
-                    //szomszedsagi_lista[innen].Add(ide);
                 }
 
+                // Beolvasom majd egy globális változóba mentem az utolsó sort
                 sor = Console.ReadLine();
                 sortomb = sor.Split(' ');
                 honnan = int.Parse(sortomb[0]);
                 hova = int.Parse(sortomb[1]);
             }
 
+            // Szomszéd kereső algoritmus
             public List<int> szomszedai(int n)
             {
                 List<int> s = new List<int>();
 
                 for (int i = 0; i < N + 1; i++)
                 {
-                    if (Szomszedsagi_tomb[n, i] != -1)
+                    //Ha van a sorban érték hozzáadom az indexet
+                    if (Szomszedsagi_tomb[n, i] != -1) 
                     {
                         s.Add(i);
                     }
                 }
+
                 return s;
             }
 
+            // A gráf kiírásáért felelős
             public void Diagnosztika()
             {
                 for (int i = 1; i < N + 1; i++)
@@ -222,8 +225,6 @@ namespace Leggyorsabb_szállítás
                     Console.WriteLine();
                 }
             }
-
-
 
             public (List<int>, int) Honnan_tomb_felgongyolitese(int[] honnan, int end)
             {
@@ -250,118 +251,121 @@ namespace Leggyorsabb_szállítás
                 return (result, maxsuly);
             }
 
-
-
-           
-
             public ((int, int)[], int[]) Dijkstra(int start)
             {
-                //inicializáltuk a tav-ot
+                // Inicializálom a 'tav'-ot
                 (int,int)[] tav = new (int,int)[N + 1]; // ide kell számpárokat létrehozni, hogy jogosan meg tudjam változtatni a relációt amikor inicializálom a kupacot
                 for (int i = 1; i < N + 1; i++)
+                {
                     tav[i] = (int.MaxValue,int.MaxValue); // végtelen megfelelője
-
+                }
                 tav[start] = (0,0);
 
-                //nem haladtunk rosszul, viszont még valamit kell csinálni a relációval, súlyokat is össze kéne hasonlítani amiket szerintem egyesével kell beírni
-
-                // honnan inicializálás
+                // A 'honnan' tömböt inicializálom
                 int[] honnan = new int[N + 1];
                 for (int i = 1; i < N + 1; i++)
-                    honnan[i] = -1;
+                {
+                    honnan[i] = -1; // Az ismeretlen értékek megfelelője
+                }
 
+                // Ez a reláció rendezi el az új kupacunkat
                 Kupac<int> kupac = new Kupac<int>((x, y) => tav[x].Item1 > tav[y].Item1 ? -1 : (tav[x] == tav[y] ? 0 : 1));
 
+                // Feltöltöm a kupacot (?)
                 for (int i = 1; i < N + 1; i++)
                 {
                     kupac.Push(i);
                 }
 
-                //visited
-                int suly = 0;
+                // Meghatározom azon pontokat ahol már jártam
                 bool[] voltamitt = new bool[N + 1];
 
+                // Ide mentem az akt verziót
+                int suly = -1;
+
+                //Elkezdem a keresést
                 while (!kupac.Empty())
                 {
-                    int todo = kupac.Pop(); //kiszedünk egy elemet
+                    // Kiszedem a legfelső elemet ami a "todo" lesz
+                    int todo = kupac.Pop();
 
-                    if (tav[todo].Item1 == int.MaxValue) // amikor már végtelenek a legkisebbek, akkor abbahagyjuk
+                    // Amikor már végtelenek a legkisebbek, akkor abbahagyjuk
+                    if (tav[todo].Item1 == int.MaxValue)
+                    {
                         return (tav, honnan);
+                    }
 
-
-                    // Feldolgozás
+                    // Elmentem, hogy voltam itt
                     voltamitt[todo] = true;
 
-                    // Szomszédok:
+                    // Megkeresem a "todo" elem összes szomszédját
                     List<int> szomszÉdai = szomszedai(todo);
 
-                    foreach (int szomszed in szomszÉdai) //vesszük a szomszédokat
+                    // Bevezetek néhány olvasás egyszerűsítő változót
+                    bool jártame            = false;
+                    int todo_tavolsága      = 0;
+                    int új_elem_a_todotól   = 0;
+                    int szomszed_tavja      = 0;
+
+                    // Végig veszem az összes szomszédját a "todo" elemnek
+                    foreach (int szomszed in szomszÉdai) 
                     {
-                        //Console.WriteLine($"csucsok: {todo}    {szomszed}");
-                        //Console.WriteLine($"uj tav: {tav[todo].Item1 + Szomszedsagi_tomb[todo, szomszed]}   regi tav:{tav[szomszed].Item1}");
-                        if (!voltamitt[szomszed] && tav[todo].Item1 + Szomszedsagi_tomb[todo, szomszed] < tav[szomszed].Item1)
+                        jártame             = voltamitt[szomszed];
+                        todo_tavolsága      = tav[todo].Item1;
+                        új_elem_a_todotól   = Szomszedsagi_tomb[todo, szomszed];
+                        szomszed_tavja      = tav[szomszed].Item1;
+
+                        // Két esetben kell figyelembe vennünk a relációt
+                        // 1. : Ha az új út távolsága egyértelműen kisebb mint a régié. Ebben az esetben nem számít a súly.
+                        if (!jártame && todo_tavolsága + új_elem_a_todotól < szomszed_tavja)
                         {
-                            //Console.WriteLine($"---------Rövidebb a téma");
-                            //Console.WriteLine($"honnan: {honnan[szomszed]}   milyen hosszú{tav[todo].Item1 + Szomszedsagi_tomb[todo, szomszed]} ");
-                            
-                            honnan[szomszed] = todo;
-                            tav[szomszed].Item1 = tav[todo].Item1 + Szomszedsagi_tomb[todo, szomszed];
+                            // Megváltoztatom az "elérés"-t
+                            honnan[szomszed]    = todo;
+
+                            // Elmentem az új elérés távját
+                            szomszed_tavja      = todo_tavolsága + új_elem_a_todotól;
+
+                            // Hozzáadom a teendőkhöz a szomszédot
                             kupac.Push(szomszed);
-
-                            //Console.WriteLine(  );
-                            // megváltozott a súlya a szomszédnak, viszont a kupacban a helye nem változott. Ezért betesszük újra, így viszont sokszor lesz bent...
-                            // kupac.Update(szomszed); // kellene egy ilyen!
                         }
-                        
-                        else if (!voltamitt[szomszed] && tav[todo].Item1 + Szomszedsagi_tomb[todo, szomszed] == tav[szomszed].Item1)
+                        // 2. : Ha az új út távolsága megegyezik a régivel. Ilyenkor figyelembe kell vennünk a súlybeli eltérést.
+                        else if (!jártame && todo_tavolsága + új_elem_a_todotól == szomszed_tavja)
                         {
-                            //Console.WriteLine("////////// Egyenlő a téma");
-                            //Console.WriteLine($" Max suly {suly}     uj suly{Szomszedsagi_suly[todo, szomszed]}");
-                            //Console.WriteLine($"{suly} < {Szomszedsagi_suly[todo, szomszed]}");
-
                             if (suly < Szomszedsagi_suly[todo, szomszed])
                             {
-                                //Console.WriteLine($" Max suly {suly}     uj suly{Szomszedsagi_suly[todo, szomszed]}");
-                                //Console.WriteLine("valzoztatas elott"+suly);
+                                //Megváltoztatom az aktuális maximum súlyt
+                                suly                = Szomszedsagi_suly[todo, szomszed];
 
-                                suly = Szomszedsagi_suly[todo, szomszed];
+                                // Megváltoztatom az "elérés"-t
+                                honnan[szomszed]    = todo;
 
-                                //Console.WriteLine("valzoztatas utan" + suly);
+                                // Elmentem az új elérés távját
+                                szomszed_tavja      = todo_tavolsága + új_elem_a_todotól;
 
-
-                                //valami változtatást kéne még ide érni, át kell irni az elérést de még nem tudom, hogy hogyan lehetne
-                                
-                                honnan[szomszed] = todo;
-                                tav[szomszed].Item1 = tav[todo].Item1 + Szomszedsagi_tomb[todo, szomszed];
+                                // Hozzáadom a teendőkhöz a szomszédot
                                 kupac.Push(szomszed);
                             }
-
-
-
                         }
-                        //Console.WriteLine();
                     }
                 }
+
                 return (tav, honnan);
             }
         }
         static void Main(string[] args)
         {
+            // A gráfot implementálom
             Szomszedsagi_listas_graf graf = new Szomszedsagi_listas_graf();
-            //graf.Diagnosztika();
 
-
+            // A változókat bevezetem
             int cel = graf.hova;
             int start = graf.honnan;
-            ((int, int)[] result, int[] oda) = graf.Dijkstra(start);
 
+            // A függvényeket meghívom
+            ((int, int)[] result, int[] oda) = graf.Dijkstra(start);
             (List<int> ut, int vegeredmeny) = graf.Honnan_tomb_felgongyolitese(oda, cel);
 
-            //Console.WriteLine($"{start}=>{cel}: {result[cel].Item1} ");
-
-            //Console.WriteLine(string.Join(", ", ut));
-            //Console.WriteLine(vegeredmeny);
-
+            // A végeredményt kiírom
             Console.WriteLine($"{result[cel].Item1} {vegeredmeny}");
             Console.WriteLine(string.Join(" ", ut));
 
