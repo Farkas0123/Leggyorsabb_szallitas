@@ -139,7 +139,7 @@ namespace Leggyorsabb_szállítás
 
         class Szomszedsagi_listas_graf
         {
-            //Bevezetem a privát és publikus globális változókat
+            // Bevezetem a privát és publikus globális változókat
             int[,] Szomszedsagi_tomb;
             int[,] Szomszedsagi_suly;
             int N;
@@ -150,11 +150,11 @@ namespace Leggyorsabb_szállítás
             // Létrehozom a gráfot
             public Szomszedsagi_listas_graf()
             {
-                //Beolvasom az elsó sort
+                // Beolvasom az elsó sort
                 string sor = Console.ReadLine();
                 string[] sortomb = sor.Split(' ');
 
-                //Az első sor adatait elmentem
+                // Az első sor adatait elmentem
                 N = int.Parse(sortomb[0]);
                 M = int.Parse(sortomb[1]);
 
@@ -200,7 +200,7 @@ namespace Leggyorsabb_szállítás
 
                 for (int i = 0; i < N + 1; i++)
                 {
-                    //Ha van a sorban érték hozzáadom az indexet
+                    // Ha van a sorban érték hozzáadom az indexet
                     if (Szomszedsagi_tomb[n, i] != -1) 
                     {
                         s.Add(i);
@@ -218,8 +218,6 @@ namespace Leggyorsabb_szállítás
                     Console.Write($"[{i}]: ");
                     for (int j = 1; j < N + 1; j++)
                     {
-                        //Console.Write($"| {Szomszedsagi_tomb[i,j]} ");
-
                         Console.Write(Szomszedsagi_tomb[i, j].ToString().Length == 2 ? $"| {Szomszedsagi_tomb[i, j]} " : $"|  {Szomszedsagi_tomb[i, j]} ");
                     }
                     Console.WriteLine();
@@ -281,9 +279,9 @@ namespace Leggyorsabb_szállítás
                 bool[] voltamitt = new bool[N + 1];
 
                 // Ide mentem az akt verziót
-                int suly = -1;
+                int suly = 0;
 
-                //Elkezdem a keresést
+                // Elkezdem a keresést
                 while (!kupac.Empty())
                 {
                     // Kiszedem a legfelső elemet ami a "todo" lesz
@@ -316,36 +314,43 @@ namespace Leggyorsabb_szállítás
                         szomszed_tavja      = tav[szomszed].Item1;
 
                         // Két esetben kell figyelembe vennünk a relációt
+
+                        #region Első eset
                         // 1. : Ha az új út távolsága egyértelműen kisebb mint a régié. Ebben az esetben nem számít a súly.
+
                         if (!jártame && todo_tavolsága + új_elem_a_todotól < szomszed_tavja)
                         {
                             // Megváltoztatom az "elérés"-t
                             honnan[szomszed]    = todo;
 
                             // Elmentem az új elérés távját
-                            szomszed_tavja      = todo_tavolsága + új_elem_a_todotól;
+                            tav[szomszed].Item1 = todo_tavolsága + új_elem_a_todotól;
 
                             // Hozzáadom a teendőkhöz a szomszédot
                             kupac.Push(szomszed);
                         }
+                        #endregion
+
+                        #region Második eset
                         // 2. : Ha az új út távolsága megegyezik a régivel. Ilyenkor figyelembe kell vennünk a súlybeli eltérést.
                         else if (!jártame && todo_tavolsága + új_elem_a_todotól == szomszed_tavja)
                         {
                             if (suly < Szomszedsagi_suly[todo, szomszed])
                             {
-                                //Megváltoztatom az aktuális maximum súlyt
+                                // Megváltoztatom az aktuális maximum súlyt
                                 suly                = Szomszedsagi_suly[todo, szomszed];
 
                                 // Megváltoztatom az "elérés"-t
                                 honnan[szomszed]    = todo;
 
                                 // Elmentem az új elérés távját
-                                szomszed_tavja      = todo_tavolsága + új_elem_a_todotól;
+                                tav[szomszed].Item1 = todo_tavolsága + új_elem_a_todotól;
 
                                 // Hozzáadom a teendőkhöz a szomszédot
                                 kupac.Push(szomszed);
                             }
                         }
+                        #endregion
                     }
                 }
 
